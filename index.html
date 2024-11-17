@@ -8,29 +8,43 @@
 </head>
 <body>
     <div id="app" class="container">
-        <input type="text" v-model="restaurantCode">
-        <button v-on:click="getOrders()">Buscar pedidos</button>
-        <ul>
-            <li v-for="order in ordersList" class="order-card">
+        <restaurant-orders-search 
+            v-on:orders-fetched="ordersList = $event.orders; showList = $event.showList; 
+            showDetails = false; restaurantCode = $event.restaurantCode">
+        </restaurant-orders-search>
+
+        <div class="msg" v-if="showList && ordersList.length <= 0">
+            Nenhum encontrado!
+        </div>
+        
+        <ul v-if="showList" class="orders-list">   
+            <li v-for="order in ordersList" class="orders-card">
                 <div class="order">
-                    <span><strong>Code:</strong> {{ order.code }}</span>
+                    <span><strong>Código:</strong> {{ order.code }}</span>
                     <span><strong>Status:</strong> {{ order.status }}</span>
-                    <button v-on:click="getOrderDetails(order.code)">Detalhes</button>
-                </div>
-                    <div v-if="orderDetails.code === order.code" class="order-details">
-                    <ul>
-                        <li v-for="order_offering in orderDetails.order_offerings">
-                            <p><strong>Item:</strong> {{ order_offering.offering.offerable.name }}</p>
-                            <p><strong>Descrição:</strong> {{ order_offering.offering.offerable.description }}</p>
-                            <p><strong>Quantidade:</strong> {{ order_offering.quantity }}</p>
-                            <p v-if="order_offering.comment"><strong>Comentário:</strong> {{ order_offering.comment }}</p>
-                        </li>
-                    </ul>
+                    <button v-on:click="getDetailsAndShow(order.code)" class="details-button">
+                        Ver detalhes
+                    </button>
                 </div>
             </li>
-        </ul>
-        
+        </ul> 
+ 
+        <div v-if="showDetails" class="details-container">
+            <h3>Detalhes do pedido #{{ orderDetails.code }}</h3>
+            <ul class="order-details">
+                <li v-for="order_offering in orderDetails.order_offerings" class="details-item">
+                    <p><strong>Item:</strong> {{ order_offering.offering.offerable.name }}</p>
+                    <p><strong>Descrição:</strong> {{ order_offering.offering.offerable.description }}</p>
+                    <p><strong>Quantidade:</strong> {{ order_offering.quantity }}</p>
+                    <p v-if="order_offering.comment"><strong>Comentário:</strong> {{ order_offering.comment }}</p>
+                </li>
+            </ul> 
+            <button v-if="orderDetails.status === 'pending_kitchen'" v-on:click="updateOrder(orderDetails.code, 'preparing')" class="prepare-order">Aceitar pedido</button>
+            <button v-if="orderDetails.status === 'preparing'" v-on:click="updateOrder(orderDetails.code, 'finished')" class="finish-order">Pronto</button>
+            <button v-on:click="backToList(orderDetails.code)" class="back-button">Ver Lista</button>
+        </div>
     </div>
+    
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="main.js"></script>
 </body>
