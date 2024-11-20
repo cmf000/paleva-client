@@ -1,3 +1,20 @@
+const messages = {
+    pt: {
+        statuses: {
+            pending_kitchen: 'Aguardando confirmação da cozinha',
+            preparing: 'Em preparação',
+            cancelled: 'Cancelado',
+            ready: 'Pronto',
+            delivered: 'Entregue'
+        }
+    }
+}
+
+const i18n = VueI18n.createI18n({
+    locale: 'pt',
+    messages
+})
+
 const RestaurantOrdersSearch = {
     emits: ['orders-fetched'], 
     data() {
@@ -18,9 +35,9 @@ const RestaurantOrdersSearch = {
                 if (!response.ok) {
                     throw new Error(`Status: ${response.status}`)
                 }
-                const orders = await response.json();
+                const data = await response.json();
+                orders = data.sort( (a, b) => { return new Date(b.placed_at) - new Date(a.placed_at )})
                 this.$emit('orders-fetched', { orders, restaurantCode: this.restaurantCode, showList: true });
-                console.log(orders)
             } catch(error) {
                 console.log(error.message)
                 this.$emit('orders-fetched', { orders: [], restaurantCode: this.restaurantCode, showList: true });
@@ -30,6 +47,7 @@ const RestaurantOrdersSearch = {
     }
 }
 
+
 const app = Vue.createApp({
     data() {
         return {
@@ -37,7 +55,9 @@ const app = Vue.createApp({
             ordersList: [],
             showList: false,
             showDetails: false,
-            orderDetails: ''
+            orderDetails: '',
+            showCancellationMenu: false,
+            cancellationNote: ''
         }
     },
 
@@ -55,7 +75,6 @@ const app = Vue.createApp({
                 this.orderDetails = await response.json();
                 this.showList = false;
                 this.showDetails = true;
-                console.log(this.orderDetails)
             } catch(error) {
                 console.log(error.message)
             }
@@ -71,7 +90,6 @@ const app = Vue.createApp({
 
         async updateOrder(orderCode, newStatus) {
             try {
-                console.log(`http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders/${orderCode}/${newStatus}`)
                 const response = await fetch(`http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders/${orderCode}/${newStatus}`, { method: 'PATCH' })
                 if (!response.ok) {
                     throw new Error(`Status: ${response.status}`)
@@ -79,12 +97,46 @@ const app = Vue.createApp({
                 this.orderDetails = await response.json();
                 this.showList = false;
                 this.showDetails = true;
-                console.log(this.orderDetails)
             } catch(error) {
-                console.log(error.message)
+                console.log(error.message);
+            }
+        },
+
+        formatDateTime(date) {
+            const dateObject = new Date(date);
+            return dateObject.toLocaleString('pt-BR');
+        },
+
+        async cancelOrder(orderCode) {
+            try {
+                const response = await fetch(
+                    `http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders/${orderCode}/cancelled`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                                order: {
+                                    cancellation_note: this.cancellationNote
+                                }
+                        })
+                    }
+                );
+                if (!response.ok) {
+                    throw new Error(`Status: ${response.status}`)
+                }
+                this.orderDetails = await response.json();
+                this.showCancellationMenu = false;
+                this.backToList(orderCode);
+            } catch(error) {
+                console.log(error.message);
             }
         }
     }
 })
 
+app.use(i18n)
 app.mount('#app')
+
+

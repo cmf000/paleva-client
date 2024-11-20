@@ -21,7 +21,8 @@
             <li v-for="order in ordersList" class="orders-card">
                 <div class="order">
                     <span><strong>Código:</strong> {{ order.code }}</span>
-                    <span><strong>Status:</strong> {{ order.status }}</span>
+                    <span><strong>Horário:</strong> {{ formatDateTime(order.placed_at) }}</span>
+                    <span><strong>Status:</strong> {{ $t('statuses.' + order.status) }}</span>
                     <button v-on:click="getDetailsAndShow(order.code)" class="details-button">
                         Ver detalhes
                     </button>
@@ -31,21 +32,35 @@
  
         <div v-if="showDetails" class="details-container">
             <h3>Detalhes do pedido #{{ orderDetails.code }}</h3>
+            <h4>Horário: {{ formatDateTime(orderDetails.placed_at) }}</h4>
             <ul class="order-details">
-                <li v-for="order_offering in orderDetails.order_offerings" class="details-item">
-                    <p><strong>Item:</strong> {{ order_offering.offering.offerable.name }}</p>
-                    <p><strong>Descrição:</strong> {{ order_offering.offering.offerable.description }}</p>
-                    <p><strong>Quantidade:</strong> {{ order_offering.quantity }}</p>
-                    <p v-if="order_offering.comment"><strong>Comentário:</strong> {{ order_offering.comment }}</p>
+                <li v-for="item in orderDetails.items" class="details-item">
+                    <p><strong>Item:</strong> {{ item.item_name }}</p>
+                    <p><strong>Descrição:</strong> {{ item.offering_description }}</p>
+                    <p><strong>Quantidade:</strong> {{ item.quantity }}</p>
+                    <p v-if="item.comment"><strong>Comentário:</strong> {{ item.comment }}</p>
                 </li>
             </ul> 
             <button v-if="orderDetails.status === 'pending_kitchen'" v-on:click="updateOrder(orderDetails.code, 'preparing')" class="prepare-order">Aceitar pedido</button>
-            <button v-if="orderDetails.status === 'preparing'" v-on:click="updateOrder(orderDetails.code, 'finished')" class="finish-order">Pronto</button>
+            <button v-if="orderDetails.status === 'preparing'" v-on:click="updateOrder(orderDetails.code, 'ready')" class="finish-order">Pronto</button>
             <button v-on:click="backToList(orderDetails.code)" class="back-button">Ver Lista</button>
+            <button v-if="orderDetails.status === 'pending_kitchen' || orderDetails.status === 'preparing'" v-on:click="showCancellationMenu = true" class="cancel-order">Cancelar Pedido</button>
+        </div>
+
+        <div v-if="showCancellationMenu" class="modal-overlay">
+            <div class="modal-content">
+                <h2>Cancelar Pedido</h2>
+                <textarea v-model="cancellationNote" placeholder="Motivo do cancelamento" class="cancellation-note"></textarea>
+                <div class="modal-buttons">
+                    <button v-on:click="showCancellationMenu = false" class="cancel-button">Voltar</button>
+                    <button v-on:click="cancelOrder(orderDetails.code)" class="confirm-button" :disabled="!cancellationNote.trim()">Confirmar</button>
+                </div>
+            </div>
         </div>
     </div>
     
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue-i18n@9"></script>
     <script src="main.js"></script>
 </body>
 </html>
