@@ -31,7 +31,7 @@ const RestaurantOrdersSearch = {
     methods: {
         async getOrders() {
             try {
-                const response = await fetch(`http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders`);
+                const response = await fetch(`${API_URL}/restaurants/${this.restaurantCode}/orders`);
                 if (!response.ok) {
                     throw new Error(`Status: ${response.status}`)
                 }
@@ -68,7 +68,7 @@ const app = Vue.createApp({
     methods:{
         async getDetailsAndShow(orderCode) {
             try {
-                const response = await fetch(`http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders/${orderCode}`)
+                const response = await fetch(`${API_URL}/restaurants/${this.restaurantCode}/orders/${orderCode}`)
                 if (!response.ok) {
                     throw new Error(`Status: ${response.status}`)
                 }
@@ -90,7 +90,7 @@ const app = Vue.createApp({
 
         async updateOrder(orderCode, newStatus) {
             try {
-                const response = await fetch(`http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders/${orderCode}/${newStatus}`, { method: 'PATCH' })
+                const response = await fetch(`${API_URL}/restaurants/${this.restaurantCode}/orders/${orderCode}/${newStatus}`, { method: 'PATCH' })
                 if (!response.ok) {
                     throw new Error(`Status: ${response.status}`)
                 }
@@ -110,7 +110,7 @@ const app = Vue.createApp({
         async cancelOrder(orderCode) {
             try {
                 const response = await fetch(
-                    `http://localhost:3000/api/v1/restaurants/${this.restaurantCode}/orders/${orderCode}/cancelled`, {
+                    `${API_URL}/restaurants/${this.restaurantCode}/orders/${orderCode}/cancelled`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',

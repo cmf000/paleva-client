@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
 </head>
 <body>
     <div id="app" class="container">
+        <header>
+            <h1>Palevá - Cozinha</h1>
+        </header>
         <restaurant-orders-search 
             v-on:orders-fetched="ordersList = $event.orders; showList = $event.showList; 
             showDetails = false; restaurantCode = $event.restaurantCode">
