@@ -1,4 +1,4 @@
-# Paleva - Cozinha
+# Palevá - Cozinha
 
 - A Vue.js application that connects to the Restaurant Management System API to display and manage restaurant orders.
 - Aplicação Vue.js que consome a API de pedidos do aplicativo [Palevá](https://github.com/cmf000/paleva).
@@ -14,6 +14,7 @@ Roda direto no navagador utilizando o Vue por uma CDN.
 
 ## Tecnologias
 - Vue.js
+- (vue-18n)[https://kazupon.github.io/vue-i18n/]
 
 
 ## Instalação
